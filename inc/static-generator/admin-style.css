@@ -1,0 +1,47 @@
+.wrap {
+    position: relative;
+    display:block; overflow:hidden;
+    margin: 0 auto;
+    max-width: 80%;
+    padding: 2em;
+    line-height: 1.8;
+}
+.wrap hr { margin:3em 0; }
+.wrap > h2:first-child { font-size:1.8rem; text-align: center; }
+.wrap h3 { font-size:1.4rem;background-color: #333;color:#fff; display:block; overflow:hidden;padding: 0.6em 1em 0.5em; border-radius: 5px; line-height: 1.1; }
+.wrap h4 { font-size:1.2rem; }
+.wrap h5 { font-size:14px; margin:0 0 1em; }
+.wrap p { font-size:16px; }
+.wrap p.caption { font-size:14px; }
+.wrap ul {
+    list-style: initial;
+    padding-left:1.5em;
+    margin-bottom:2em;
+}
+.wrap li {
+    font-size:14px;
+}
+.wrap th,
+.wrap td { box-sizing: border-box; }
+.wrap .button { 
+    width:80%;
+    position: relative;
+    right:0;
+    display:block; overflow:hidden;
+    margin: 1em auto;
+}
+.wrap .button .dashicons {
+    line-height: inherit;
+}
+.wrap .button-large {
+    font-size:1.2rem;
+}
+.wrap .txt-right {
+    text-align: right;
+}
+
+.wrap textarea,
+.wrap input[type="text"]{
+    border:1px solid #ccc;
+    padding: 0.5em 1em;width:100%;
+}
