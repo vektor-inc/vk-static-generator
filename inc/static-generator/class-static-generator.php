@@ -24,7 +24,7 @@ class VK_StaticGenerator {
 	public static function get_setting_options(){
 		$defaults = array(
 			'export_dir'           	=> ABSPATH . 'wp-content/plugins/vk-static-generator/static/',
-			'extra_url'          	=> 'https://tes†.com',
+			'extra_url'          	=> home_url(),
 			'replace_url'          	=> '/',
 			'plugin_name'          	=> '',
 			'disable_css_edit'     	=> false,
@@ -528,91 +528,65 @@ class VK_StaticGenerator {
 
 		$options = self::get_setting_options();
 
+		// １行毎に配列に変換
 		$array = explode( "\n", $options['utl_list'] );
 
+		$export_dir = $options['export_dir'];
+
+		// 末尾が/じゃなかったらとりあえず追加する
+		preg_match( '/\/$/', $export_dir, $match );
+		if ( ! $match ){
+			$export_dir = $export_dir . '/';
+		}
+
+		$new_dir = $export_dir;
 		foreach( $array as $url ){
 			$url = trim( $url );
 
-			// $original_file_path = str_replace( site_url('/') , ABSPATH , $url );
-			// print '<pre style="text-align:left">';print_r($original_file_path);print '</pre>';
-			// $content = file_get_contents( $original_file_path );
-			$content = file_get_contents( trim( $url ) );
-			// echo '<div>' . $url . '</div>';
-			$original_file_path = str_replace( $options['extra_url'] , '', $url );
-			$new_file_path = $options['export_dir'];
-			
-			file_put_contents( '/Users/kurudrive/Local Sites/woo/app/public/wp-content/plugins/vk-static-generator/static/index.html' , $content );
+			// URLのHTMLを変数に格納
+			$target_url = trim( $url );
+			// URLのHTMLを変数に格納
+			$content = file_get_contents( trim( $target_url ) );
+			// 絶対URL部分を置換
+			$content = str_replace( $options['extra_url'] , $options['replace_url'], $content );
+
+			// URLの余分な部分を削除
+			$new_file_path = str_replace( $options['extra_url'] , '', $url );
+
+			// パスに // があったら / に変更
+			$new_file_path = preg_replace( '/\/\//', '/', $new_file_path );
+
+			// print '<pre style="text-align:left">';print_r($new_file_path);print '</pre>';
+
+			// / を元に配列に変換
+			$new_path_array = explode('/', $new_file_path);
+
+			// 配列 $new_path_array からファイル名を削除 
+			$basename = array_pop( $new_path_array );
+
+			if ( count( $new_path_array ) > 0 ) {
+
+				$new_dir = $export_dir;
+				foreach ( $new_path_array as $dir ){
+
+					$new_dir .= '/' . $dir . '/';
+					// パスに // があったら / に変更
+					$new_dir = preg_replace( '/\/\//', '/', $new_dir );
+
+					if ( ! file_exists(  $new_dir  ) ){
+						mkdir( $new_dir, 0777, true );
+					}
+				}
+			}
+
+			$new_full_path = $export_dir . $new_file_path;
+
+			preg_match( '/\/$/', $target_url, $match );
+			if ( $match ){
+				$new_full_path = $new_full_path . 'index.html';
+			}
+			file_put_contents( $new_full_path , $content );
 		}
-
-		// /*
-		// /* Copy Template
-		// /* ------------------------------------------- */
-		// $options = self::get_setting_options();
-
-		// if ( empty( $options['plugin_name'] ) ){
-		// 	return;
-		// }
-
-		// $name = self::get_plugin_convert_name( $options['plugin_name'] );
-		// $textdomain = self::get_plugin_convert_textdomain( $options['plugin_name'] );
-		// $packagename = self::get_plugin_convert_packagename( $options['plugin_name'] );
-
-		// $new_dir_path = ABSPATH . 'wp-content/plugins/' . $textdomain . '/';
-		// $plugin_template_dir_path = VK_STATIC_DIRECTORY_PATH . '/plugin-template/';
-
-		// // Update manage target directory
-		// $new_data_directory = $new_dir_path . 'patterns-data/';
-		// $options['export_dir'] = $new_data_directory;
-		// update_option( 'vk-static-setting', $options );
-
-		// if ( ! file_exists( $new_dir_path ) ) {
-		// 	$mkdir_return = mkdir( $new_dir_path, 0755 );
-		// }
-
-		// // Export Pattern Data
-		// self::export_pattern_data();
-
-		// if ( file_exists( $new_dir_path ) ) {
-		// 	$plugin_template_dir_path = VK_STATIC_DIRECTORY_PATH . '/plugin-template/';
-		// }
-
-		// if ( $handle = opendir( $plugin_template_dir_path )  ) {
-
-		// 	//オープンしたディレクトリにファイルが存在すればループで取り出していく
-		// 	while( false !== ( $entry = readdir( $handle ) ) ) {
-		// 		//ファイル名が「.」「..」じゃなければ処理を実行
-		// 		if ( $entry != "." && $entry != ".." ) {
-
-		// 			// readme.txではなくプラグインファイルの場合はファイル名がプラグインのテキストドメイン名になる
-		// 			if ( $entry === 'pluginname.php' ){
-		// 				$new_file_path =  $new_dir_path . $textdomain . '.php';
-		// 			} else {
-		// 				$new_file_path = $new_dir_path . $entry;
-		// 			}
-
-		// 			// プラグインファイルやreadme.txtがない場合（新規のとき）のみ実行
-		// 			if ( ! file_exists( $new_file_path ) ){
-
-		// 				//ファイルを指定したディレクトリに複製
-		// 				copy( $plugin_template_dir_path . $entry, $new_file_path  );
-
-		// 				$str = file_get_contents( $new_file_path  );
-
-		// 				$str = str_replace( '****** Name:', 'Plugin Name:', $str );
-		// 				$str = str_replace( 'PLUGIN NAME HERE', $name, $str );
-		// 				$str = str_replace( 'plugin-text-domain', $textdomain, $str );
-		// 				$str = str_replace( 'PLUGIN_PACKAGE_NAME', $packagename, $str );
-
-		// 				// 置換後の内容で上書き
-		// 				file_put_contents( $new_file_path , $str );
-		// 			}
-		// 		}
-		// 	}
-		// 	//オープンしたディレクトリのハンドルをクローズする
-		// 	closedir( $handle );
-		// }
-
-		// add_action( 'admin_notices', array(__CLASS__, 'desplay_message_plugin_generate_success') );
 
 	}
 
